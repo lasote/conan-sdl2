@@ -46,6 +46,7 @@ class SDLConan(ConanFile):
         """
         self.copy(pattern="*.h", dst="include", src="%s/_build/include" % self.folder, keep_path=False)
         self.copy(pattern="*.h", dst="include", src="%s/include" % self.folder, keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.a", dst="lib", src="%s/_build/" % self.folder, keep_path=False)       
@@ -62,13 +63,13 @@ class SDLConan(ConanFile):
                 self.cpp_info.libs.extend(["user32", "gdi32", "winmm", "imm32", "ole32",
                                                    "oleaut32", "version", "uuid"])
         elif self.settings.os == "Linux":
-                # CFLAGS
-                self.cpp_info.cflags = ["-g", "-O3", "-DHAVE_LINUX_VERSION_H"]
-                # EXTRA_CFLAGS
-                self.cpp_info.cflags.extend(["-D_REENTRANT", "-mfpmath=387", "-msse2",
-                                                     "-msse", "-m3dnow", "-mmmx",
-                                                     "-fvisibility=hidden"])
-                # EXTRA LIBS
-                self.cpp_info.libs.extend(["m", "dl", "GL"])
-                # EXTRA_LDFLAGS
-                self.cpp_info.libs.append("-pthread")
+            # DEFINIITONS
+            self.cpp_info.defines.extend(["HAVE_LINUX_VERSION_H", "_REENTRANT"])
+            # EXTRA_CFLAGS
+            self.cpp_info.cflags.extend(["-mfpmath=387", "-msse2",
+                                         "-msse", "-m3dnow", "-mmmx",
+                                         "-fvisibility=hidden"])
+            # EXTRA LIBS
+            self.cpp_info.libs.extend(["m", "dl", "GL"])
+            # EXTRA_LDFLAGS
+            self.cpp_info.libs.append("pthread")
