@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conans import CMake
+from conans import GCC
 
 
 class DefaultNameConan(ConanFile):
@@ -7,14 +7,20 @@ class DefaultNameConan(ConanFile):
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     requires = "SDL2/2.0.3@lasote/stable"
-    generators = "cmake"
+    generators = ["cmake", "gcc"] # Generates conanbuildinfo.gcc with all deps information
 
     def build(self):
-        cmake = CMake(self.settings)
-        self.run('cmake . %s' % cmake.command_line)
-	self.output.info(cmake.build_config) 
-	self.output.info("cmake --build . %s" % cmake.build_config)       
-	self.run("cmake --build . %s" % cmake.build_config)
+        if self.settings.os == "Linux":
+            # EXAMPLE OF USE OF GCC, IT CAN BE COMPILED WITH CMAKE TOO
+            gcc = GCC(self.settings)
+            self.run("mkdir -p bin")
+            command = 'gcc sdl_timer.c @conanbuildinfo.gcc -o bin/timer %s' % gcc.command_line
+            self.output.warn(command)
+            self.run(command)
+        else:
+            cmake = CMake(self.settings)
+            self.run('cmake . %s' % cmake.command_line)
+            self.run("cmake --build . %s" % cmake.build_config)
 
     def imports(self):
         self.copy(pattern="*.dll", dst="bin", src="bin")

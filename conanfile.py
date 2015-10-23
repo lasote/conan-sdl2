@@ -38,6 +38,7 @@ class SDLConan(ConanFile):
             self.build_with_make()
 
     def build_with_make(self):
+
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
         if self.settings.arch == "x86":
@@ -100,10 +101,10 @@ class SDLConan(ConanFile):
                 self.cpp_info.libs.append("SDL2main")
             # DEFINIITONS
             self.cpp_info.defines.extend(["HAVE_LINUX_VERSION_H", "_REENTRANT"])
-            # EXTRA_CFLAGS
-            self.cpp_info.cflags.extend(["-mfpmath=387", "-msse2",
-                                         "-msse", "-m3dnow", "-mmmx",
-                                         "-fvisibility=hidden"])
+            # # EXTRA_CFLAGS
+            # self.cpp_info.cflags.extend(["-mfpmath=387", "-msse2",
+            #                              "-msse", "-m3dnow", "-mmmx",
+            #                              "-fvisibility=hidden"])
             # # EXTRA LIBS
             self.cpp_info.libs.extend(["m", "dl"])
             # EXTRA_LDFLAGS
