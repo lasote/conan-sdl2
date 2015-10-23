@@ -31,6 +31,29 @@ class SDLConan(ConanFile):
         """ Define your project building. You decide the way of building it
             to reuse it later in any other project.
         """
+
+        if self.settings.os == "Windows":
+            self.build_with_cmake()
+        else:
+            self.build_with_make()
+
+    def build_with_make(self):
+        self.run("cd %s" % self.folder)
+        self.run("chmod a+x %s/configure" % self.folder)
+        if self.settings.arch == "x86":
+            self.cpp_info.cflags.append("-m32")
+            self.cpp_info.cppflags.append("-m32")
+            self.cpp_info.sharedlinkflags.append("-m32")
+        
+        args = 'CFLAGS="%s" CXXFLAGS="%s" LDFLAGS="%s"' % (" ".join(self.cpp_info.cflags), 
+                                                           " ".join(self.cpp_info.cppflags),
+                                                           " ".join(self.cpp_info.sharedlinkflags))
+        configure_command = 'cd %s && ./configure %s' % (self.folder, args)
+        self.output.warn("Configure with: %s" % configure_command)
+        self.run(configure_command)
+        self.run("cd %s && make" % self.folder)
+
+    def build_with_cmake(self):
         cmake = CMake(self.settings)
          # Build
         directx_def = "-DDIRECTX=ON" if self.options.directx else "-DDIRECTX=OFF"
@@ -46,16 +69,26 @@ class SDLConan(ConanFile):
         """
         self.copy(pattern="*.h", dst="include", src="%s/_build/include" % self.folder, keep_path=False)
         self.copy(pattern="*.h", dst="include", src="%s/include" % self.folder, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
+        
+        # Win
         self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
-        self.copy(pattern="*.a", dst="lib", src="%s/_build/" % self.folder, keep_path=False)       
         
+        # UNIX
+        if self.settings.os != "Windows":
+            if not self.options.shared:
+                self.copy(pattern="*.a", dst="lib", src="%s/build/" % self.folder, keep_path=False)
+                self.copy(pattern="*.a", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)   
+            else:
+                self.copy(pattern="*.so*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
+                self.copy(pattern="*.dylib*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
+
     def package_info(self):  
                 
-        self.cpp_info.libs = ["SDL2main", "SDL2"]
+        self.cpp_info.libs = ["SDL2"]
           
         if self.settings.os == "Windows":
+            self.cpp_info.libs.append("SDL2main")
             if self.settings.compiler == "Visual Studio":
                 # CFLAGS
                 self.cpp_info.cflags = ["/DWIN32", "/D_WINDOWS", "/W3"]
@@ -63,13 +96,15 @@ class SDLConan(ConanFile):
                 self.cpp_info.libs.extend(["user32", "gdi32", "winmm", "imm32", "ole32",
                                                    "oleaut32", "version", "uuid"])
         elif self.settings.os == "Linux":
+            if not self.options.shared:
+                self.cpp_info.libs.append("SDL2main")
             # DEFINIITONS
             self.cpp_info.defines.extend(["HAVE_LINUX_VERSION_H", "_REENTRANT"])
             # EXTRA_CFLAGS
             self.cpp_info.cflags.extend(["-mfpmath=387", "-msse2",
                                          "-msse", "-m3dnow", "-mmmx",
                                          "-fvisibility=hidden"])
-            # EXTRA LIBS
-            self.cpp_info.libs.extend(["m", "dl", "GL"])
+            # # EXTRA LIBS
+            self.cpp_info.libs.extend(["m", "dl"])
             # EXTRA_LDFLAGS
             self.cpp_info.libs.append("pthread")
