@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conans import GCC
+from conans import GCC, CMake
 
 
 class DefaultNameConan(ConanFile):

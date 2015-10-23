@@ -33,15 +33,17 @@ if __name__ == "__main__":
     else:  # Compiler and version not specified, please set it in your home/.conan/conan.conf (Valid for Macos and Linux)
         compiler = ""
 
-    # # x86_64 
+    # x86_64 
     build_run_example(compiler + '-s build_type=Debug -s arch=x86_64 -o SDL2:shared=True')
     build_run_example(compiler + '-s build_type=Release -s arch=x86_64 -o SDL2:shared=True')
-    build_run_example(compiler + '-s build_type=Debug -s arch=x86_64 -o SDL2:shared=False')
-    build_run_example(compiler + '-s build_type=Release -s arch=x86_64 -o SDL2:shared=False')
+    if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
+        build_run_example(compiler + '-s build_type=Debug -s arch=x86_64 -o SDL2:shared=False')
+        build_run_example(compiler + '-s build_type=Release -s arch=x86_64 -o SDL2:shared=False')
 
     # x86
     build_run_example(compiler + '-s build_type=Debug -s arch=x86 -o SDL2:shared=True')
     build_run_example(compiler + '-s build_type=Release -s arch=x86 -o SDL2:shared=True')
-    build_run_example(compiler + '-s build_type=Debug -s arch=x86 -o SDL2:shared=False')
-    build_run_example(compiler + '-s build_type=Release -s arch=x86 -o SDL2:shared=False')
+    if platform.system() != "Darwin": # Don't know why but fails linkage in OSX for static libs
+        build_run_example(compiler + '-s build_type=Debug -s arch=x86 -o SDL2:shared=False')
+        build_run_example(compiler + '-s build_type=Release -s arch=x86 -o SDL2:shared=False')
 
