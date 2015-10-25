@@ -14,7 +14,8 @@ class SDLConan(ConanFile):
     shared=True'''
     exports = "CMakeLists.txt"
     generators = "cmake"
-    
+    url="http://github.com/lasote/conan-sdl2"    
+
     def config(self):
         if self.settings.os != "Windows":
             self.options.directx = False
