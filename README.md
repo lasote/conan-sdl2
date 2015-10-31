@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/lasote/conan-sdl2.svg)](https://travis-ci.org/lasote/conan-sdl2)
+
 # conan-sdl2
 
 [Conan.io](https://conan.io) package for SDL2 library
