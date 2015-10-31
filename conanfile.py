@@ -124,6 +124,6 @@ class SDLConan(ConanFile):
             #                              "-msse", "-m3dnow", "-mmmx",
             #                              "-fvisibility=hidden"])
             # # EXTRA LIBS
-            self.cpp_info.libs.extend(["m", "dl"])
+            self.cpp_info.libs.extend(["m", "dl", "rt"])
             # EXTRA_LDFLAGS
             self.cpp_info.libs.append("pthread")
