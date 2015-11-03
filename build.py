@@ -1,17 +1,16 @@
 import os
-import shutil
 import platform
-import hashlib
-
-
-def test(arguments):
-    command = "conan test %s" % arguments
-    retcode = os.system(command)
-    if retcode != 0:
-        exit("Error while executing:\n\t %s" % command)
+import sys
 
 if __name__ == "__main__":
     os.system('conan export lasote/stable')
+   
+    def test(settings):
+        argv =  " ".join(sys.argv[1:])
+        command = "conan test %s %s" % (settings, argv)
+        retcode = os.system(command)
+        if retcode != 0:
+            exit("Error while executing:\n\t %s" % command)
 
     if platform.system() == "Windows":
         compiler = '-s compiler="Visual Studio" -s compiler.version=12 -s compiler.runtime=MT '
