@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conans.tools import download, unzip
+from conans.tools import download, unzip, replace_in_file
 import os
 import shutil
 from conans import CMake
@@ -53,7 +53,7 @@ class SDLConan(ConanFile):
         if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
             new_str = "-install_name "
-            self.replace_in_file("%s/configure" % self.folder, old_str, new_str)
+            replace_in_file("%s/configure" % self.folder, old_str, new_str)
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
             configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh ./configure %s' % (self.folder, args)
         else:
@@ -71,13 +71,6 @@ class SDLConan(ConanFile):
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         self.run("cd %s/_build && cmake --build . %s" % (self.folder, cmake.build_config))
-
-    def replace_in_file(self, file_path, search, replace):
-        with open(file_path, 'r') as content_file:
-            content = content_file.read()
-            content = content.replace(search, replace)
-        with open(file_path, 'wb') as handle:
-            handle.write(content)
 
     def package(self):
         """ Define your conan structure: headers, libs and data. After building your
