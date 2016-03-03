@@ -19,6 +19,10 @@ class SDLConan(ConanFile):
     def config(self):
         if self.settings.os != "Windows":
             self.options.directx = False
+        try: # Try catch can be removed when conan 0.8 is released
+            del self.settings.compiler.libcxx 
+        except: 
+            pass
     
     def source(self):
         
