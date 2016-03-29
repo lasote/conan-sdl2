@@ -7,7 +7,7 @@ class DefaultNameConan(ConanFile):
     name = "DefaultName"
     version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
-    requires = "SDL2/2.0.3@lasote/stable"
+    requires = "SDL2/2.0.4@lasote/stable"
     generators = ["cmake", "gcc"] # Generates conanbuildinfo.gcc with all deps information
 
     def build(self):

@@ -2,16 +2,17 @@ from conans import ConanFile
 from conans.tools import download, unzip, replace_in_file
 import os
 import shutil
-from conans import CMake
+from conans import CMake, ConfigureEnvironment
 
 class SDLConan(ConanFile):
     name = "SDL2"
-    version = "2.0.3"
+    version = "2.0.4"
     folder = "SDL2-%s" % version
     settings = "os", "arch", "compiler", "build_type"
-    options = {"directx": [True, False], "shared": [True, False]}
+    options = {"directx": [True, False], "shared": [True, False], "fPIC": [True, False]}
     default_options = '''directx=False
-    shared=True'''
+    shared=False
+    fPIC=True'''
     exports = "CMakeLists.txt"
     generators = "cmake"
     url="http://github.com/lasote/conan-sdl2"    
@@ -25,9 +26,8 @@ class SDLConan(ConanFile):
             pass
     
     def source(self):
-        
-        zip_name = "%s.zip" % self.folder
-        download("https://www.libsdl.org/release/SDL2-%s.zip" % self.version, zip_name)
+        zip_name = "%s.tar.gz" % self.folder
+        download("https://www.libsdl.org/release/%s" % zip_name, zip_name)
         unzip(zip_name)
         shutil.move("%s/CMakeLists.txt" % self.folder, "%s/CMakeListsOriginal.cmake" % self.folder)
         shutil.move("CMakeLists.txt", "%s/CMakeLists.txt" % self.folder)
@@ -43,17 +43,15 @@ class SDLConan(ConanFile):
             self.build_with_make()
 
     def build_with_make(self):
-
+        env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
+        if self.options.fPIC:
+            env_line = env.command_line.replace('CFLAGS=" "', 'CFLAGS="-fPIC"')
+        else:
+            env_line = env.command_line
+            
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
-        if self.settings.arch == "x86":
-            self.cpp_info.cflags.append("-m32")
-            self.cpp_info.cppflags.append("-m32")
-            self.cpp_info.sharedlinkflags.append("-m32")
-        
-        args = 'CFLAGS="%s" CXXFLAGS="%s" LDFLAGS="%s"' % (" ".join(self.cpp_info.cflags), 
-                                                           " ".join(self.cpp_info.cppflags),
-                                                           " ".join(self.cpp_info.sharedlinkflags))
+
         if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
             new_str = "-install_name "
@@ -61,10 +59,10 @@ class SDLConan(ConanFile):
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
             configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh ./configure %s' % (self.folder, args)
         else:
-            configure_command = 'cd %s && ./configure %s' % (self.folder, args)
+            configure_command = 'cd %s && %s ./configure' % (self.folder, env_line)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
-        self.run("cd %s && make" % self.folder)
+        self.run("cd %s && %s make" % (self.folder, env_line))
 
     def build_with_cmake(self):
         cmake = CMake(self.settings)
