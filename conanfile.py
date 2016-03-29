@@ -51,6 +51,15 @@ class SDLConan(ConanFile):
             
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
+        
+        if self.settings.arch == "x86":
+            self.cpp_info.cflags.append("-m32")
+            self.cpp_info.cppflags.append("-m32")
+            self.cpp_info.sharedlinkflags.append("-m32")
+        
+        args = 'CFLAGS="%s" CXXFLAGS="%s" LDFLAGS="%s"' % (" ".join(self.cpp_info.cflags), 
+                                                           " ".join(self.cpp_info.cppflags),
+                                                           " ".join(self.cpp_info.sharedlinkflags))
 
         if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
@@ -59,7 +68,7 @@ class SDLConan(ConanFile):
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
             configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh ./configure %s' % (self.folder, args)
         else:
-            configure_command = 'cd %s && %s ./configure' % (self.folder, env_line)
+            configure_command = 'cd %s && %s ./configure %s' % (self.folder, env_line, args)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         self.run("cd %s && %s make" % (self.folder, env_line))
