@@ -15,7 +15,8 @@ class SDLConan(ConanFile):
     fPIC=True'''
     exports = "CMakeLists.txt"
     generators = "cmake"
-    url="http://github.com/lasote/conan-sdl2"    
+    url="http://github.com/lasote/conan-sdl2"
+    requires = "zlib/1.2.8@lasote/stable"
 
     def config(self):
         if self.settings.os != "Windows":
@@ -43,12 +44,7 @@ class SDLConan(ConanFile):
             self.build_with_make()
 
     def build_with_make(self):
-        env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
-        if self.options.fPIC:
-            env_line = env.command_line.replace('CFLAGS=" "', 'CFLAGS="-fPIC"')
-        else:
-            env_line = env.command_line
-            
+         
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
         
@@ -68,10 +64,10 @@ class SDLConan(ConanFile):
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
             configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh ./configure %s' % (self.folder, args)
         else:
-            configure_command = 'cd %s && %s ./configure %s' % (self.folder, env_line, args)
+            configure_command = 'cd %s && ./configure %s' % (self.folder, args)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
-        self.run("cd %s && %s make" % (self.folder, env_line))
+        self.run("cd %s && make" % (self.folder))
 
     def build_with_cmake(self):
         cmake = CMake(self.settings)
