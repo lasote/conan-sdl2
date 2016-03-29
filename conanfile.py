@@ -49,25 +49,27 @@ class SDLConan(ConanFile):
         self.run("chmod a+x %s/configure" % self.folder)
         
         if self.settings.arch == "x86":
-            self.cpp_info.cflags.append("-m32")
-            self.cpp_info.cppflags.append("-m32")
-            self.cpp_info.sharedlinkflags.append("-m32")
+            suffix = 'CFLAGS="-m32" LDFLAGS="-m32"' # not working the env, dont know why
         
-        args = 'CFLAGS="%s" CXXFLAGS="%s" LDFLAGS="%s"' % (" ".join(self.cpp_info.cflags), 
-                                                           " ".join(self.cpp_info.cppflags),
-                                                           " ".join(self.cpp_info.sharedlinkflags))
+        env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
+        if self.options.fPIC:
+            env_line = env.command_line.replace('CFLAGS="', 'CFLAGS="-fPIC ')
+        else:
+            env_line = env.command_line
+            
+        env_line = env_line.replace('LIBS="', 'LIBS2="') # Rare error if LIBS is kept
 
         if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
             new_str = "-install_name "
             replace_in_file("%s/configure" % self.folder, old_str, new_str)
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
-            configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh ./configure %s' % (self.folder, args)
+            configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh && %s ./configure %s' % (self.folder, env_line, suffix)
         else:
-            configure_command = 'cd %s && ./configure %s' % (self.folder, args)
+            configure_command = 'cd %s && %s ./configure %s' % (self.folder, env_line, suffix)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
-        self.run("cd %s && make" % (self.folder))
+        self.run("cd %s && %s make %s" % (self.folder, env_line, suffix))
 
     def build_with_cmake(self):
         cmake = CMake(self.settings)
