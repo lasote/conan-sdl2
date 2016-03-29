@@ -48,12 +48,15 @@ class SDLConan(ConanFile):
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
         
+        suffix = ""
+        with_fpic = ""
         if self.settings.arch == "x86":
             suffix = 'CFLAGS="-m32" LDFLAGS="-m32"' # not working the env, dont know why
         
         env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
         if self.options.fPIC:
             env_line = env.command_line.replace('CFLAGS="', 'CFLAGS="-fPIC ')
+            with_fpic += " --with-pic"
         else:
             env_line = env.command_line
             
@@ -66,7 +69,7 @@ class SDLConan(ConanFile):
             self.run("chmod a+x %s/build-scripts/gcc-fat.sh" % self.folder)
             configure_command = 'cd %s && CC=$(pwd)/build-scripts/gcc-fat.sh && %s ./configure %s' % (self.folder, env_line, suffix)
         else:
-            configure_command = 'cd %s && %s ./configure %s' % (self.folder, env_line, suffix)
+            configure_command = 'cd %s && %s ./configure %s %s' % (self.folder, env_line, suffix, with_fpic)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         self.run("cd %s && %s make %s" % (self.folder, env_line, suffix))
