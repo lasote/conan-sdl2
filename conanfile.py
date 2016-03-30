@@ -17,6 +17,7 @@ class SDLConan(ConanFile):
     generators = "cmake"
     url="http://github.com/lasote/conan-sdl2"
     requires = "zlib/1.2.8@lasote/stable"
+    license="zlib license: https://www.libsdl.org/license.php "
 
     def config(self):
         if self.settings.os != "Windows":
@@ -97,6 +98,7 @@ class SDLConan(ConanFile):
         
         # UNIX
         if self.settings.os != "Windows":
+            self.copy(pattern="sdl2-config", dst="lib", src="%s/" % self.folder, keep_path=False)
             if not self.options.shared:
                 self.copy(pattern="*.a", dst="lib", src="%s/build/" % self.folder, keep_path=False)
                 self.copy(pattern="*.a", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)   
