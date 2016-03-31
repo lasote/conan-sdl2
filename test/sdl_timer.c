@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 
 #define DEFAULT_RESOLUTION  1
 
