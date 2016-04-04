@@ -18,6 +18,15 @@ class SDLConan(ConanFile):
     url="http://github.com/lasote/conan-sdl2"
     requires = "zlib/1.2.8@lasote/stable"
     license="zlib license: https://www.libsdl.org/license.php "
+    
+    def system_requirements(self):
+        if not self.has_gl_installed():
+            if self.settings.os == "Linux":
+                self.output.warn("GL is not installed in this machine! Conan will try to install it.")
+                self.run("sudo apt-get install -y freeglut3 freeglut3-dev libglew1.5-dev libglm-dev")
+                if not self.has_gl_installed():
+                    self.output.error("GL Installation doesn't work... install it manually and try again")
+                    exit(1)
 
     def config(self):
         if self.settings.os != "Windows":
@@ -138,3 +147,78 @@ class SDLConan(ConanFile):
             self.cpp_info.libs.extend(["m", "dl", "rt"])
             # EXTRA_LDFLAGS
             self.cpp_info.libs.append("pthread")
+
+    def has_gl_installed(self):
+        if self.settings.os == "Linux":
+            return self.has_gl_installed_linux()
+        return True
+        
+    def has_gl_installed_linux(self):
+        test_program = '''#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <stdlib.h>
+
+void quad()
+{
+glBegin(GL_QUADS);
+glVertex2f( 0.0f, 1.0f); // Top Left
+glVertex2f( 1.0f, 1.0f); // Top Right
+glVertex2f( 1.0f, 0.0f); // Bottom Right
+glVertex2f( 0.0f, 0.0f); // Bottom Left
+glEnd();
+}
+
+void draw()
+{
+// Make background colour black
+glClearColor( 0, 0, 0, 0 );
+glClear ( GL_COLOR_BUFFER_BIT );
+
+// Push the matrix stack - more on this later
+glPushMatrix();
+
+// Set drawing colour to blue
+glColor3f( 0, 0, 1 );
+
+// Move the shape to middle of the window
+// More on this later
+glTranslatef(-0.5, -0.5, 0.0);
+
+// Call our Quad Method
+quad();
+
+// Pop the Matrix
+glPopMatrix();
+
+// display it 
+glutSwapBuffers();
+}
+
+// Keyboard method to allow ESC key to quit
+void keyboard(unsigned char key,int x,int y)
+{
+if(key==27) exit(0);
+}
+
+int main(int argc, char **argv)
+{
+// Double Buffered RGB display 
+glutInitDisplayMode( GLUT_RGB | GLUT_DOUBLE);
+// Set window size
+glutInitWindowSize( 500,500 );
+
+glutDisplayFunc(draw);
+glutKeyboardFunc(keyboard);
+// Start the Main Loop
+glutMainLoop();
+}
+'''
+        try:
+            self.run('echo "%s" > /tmp/quad.c' % test_program)
+            self.run("cc /tmp/quad.c  -lglut -lGLU -lGL -lm")
+            self.output.info("GL DETECTED OK!")
+            return True
+        except:
+            return False 
+        
