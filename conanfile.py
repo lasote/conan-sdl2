@@ -121,7 +121,7 @@ class SDLConan(ConanFile):
 
     def package_info(self):  
                 
-        self.cpp_info.libs = ["SDL2"]
+        self.cpp_info.libs = ["SDL2", "GL"]
           
         if self.settings.os == "Windows":
             self.cpp_info.libs.append("SDL2main")
