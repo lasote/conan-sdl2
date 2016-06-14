@@ -120,8 +120,11 @@ class SDLConan(ConanFile):
                 self.copy(pattern="*.dylib*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
 
     def package_info(self):  
-                
-        self.cpp_info.libs = ["SDL2", "GL"]
+        self.cpp_info.libs = ["SDL2"]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs.append("OpenGL32")
+        else:
+            self.cpp_info.libs.append("GL")
           
         if self.settings.os == "Windows":
             self.cpp_info.libs.append("SDL2main")
