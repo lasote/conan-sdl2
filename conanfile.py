@@ -125,7 +125,7 @@ class SDLConan(ConanFile):
         self.cpp_info.libs = ["SDL2"]
           
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("GL")
+            self.cpp_info.libs.append("OpenGL32")
             self.cpp_info.libs.append("SDL2main")
             if self.settings.compiler == "Visual Studio":
                 # CFLAGS
