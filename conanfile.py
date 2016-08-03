@@ -121,9 +121,10 @@ class SDLConan(ConanFile):
 
     def package_info(self):  
                 
-        self.cpp_info.libs = ["SDL2", "GL"]
+        self.cpp_info.libs = ["SDL2"]
           
         if self.settings.os == "Windows":
+            self.cpp_info.libs.append("GL")
             self.cpp_info.libs.append("SDL2main")
             if self.settings.compiler == "Visual Studio":
                 # CFLAGS
@@ -134,7 +135,23 @@ class SDLConan(ConanFile):
         elif self.settings.os == "Macos":
             if not self.options.shared:
                 self.cpp_info.libs.append("SDL2main")
+                self.cpp_info.libs.append("iconv")
+                
+                
+                self.cpp_info.exelinkflags.append("-framework Carbon")
+                self.cpp_info.exelinkflags.append("-framework CoreAudio")
+                self.cpp_info.exelinkflags.append("-framework Cocoa")
+                self.cpp_info.exelinkflags.append("-framework Security")
+                self.cpp_info.exelinkflags.append("-framework IOKit")
+                self.cpp_info.exelinkflags.append("-framework CoreVideo")
+                self.cpp_info.exelinkflags.append("-framework AudioToolbox")
+                self.cpp_info.exelinkflags.append("-framework ForceFeedback")
+                
+                
+                self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+                
         elif self.settings.os == "Linux":
+            self.cpp_info.libs.append("GL")
             if not self.options.shared:
                 self.cpp_info.libs.append("SDL2main")
             # DEFINIITONS
