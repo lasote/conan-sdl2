@@ -18,6 +18,7 @@ class SDLConan(ConanFile):
     url="http://github.com/lasote/conan-sdl2"
     requires = "zlib/1.2.8@lasote/stable"
     license="zlib license: https://www.libsdl.org/license.php "
+    build_policy="missing"
     
     def system_requirements(self):
         if not self.has_gl_installed():
