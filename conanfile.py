@@ -147,6 +147,7 @@ class SDLConan(ConanFile):
                 self.cpp_info.exelinkflags.append("-framework CoreVideo")
                 self.cpp_info.exelinkflags.append("-framework AudioToolbox")
                 self.cpp_info.exelinkflags.append("-framework ForceFeedback")
+                self.cpp_info.exelinkflags.append("-framework AudioUnit")
                 
                 
                 self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
