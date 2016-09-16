@@ -24,7 +24,7 @@ class SDLConan(ConanFile):
         if not self.has_gl_installed():
             if self.settings.os == "Linux":
                 self.output.warn("GL is not installed in this machine! Conan will try to install it.")
-                self.run("sudo apt-get install -y freeglut3 freeglut3-dev libglew1.5-dev libglm-dev")
+                self.run("sudo apt-get update && sudo apt-get install -y freeglut3 freeglut3-dev libglew1.5-dev libglm-dev")
                 if not self.has_gl_installed():
                     self.output.error("GL Installation doesn't work... install it manually and try again")
                     exit(1)
