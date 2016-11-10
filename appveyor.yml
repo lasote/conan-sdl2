@@ -7,14 +7,12 @@ environment:
     CONAN_UPLOAD: 1
     CONAN_REFERENCE: "SDL2/2.0.4"
     CONAN_USERNAME: "lasote"
-    CONAN_CHANNEL: "ci"
-    CONAN_TOTAL_PAGES: 4
+    CONAN_CHANNEL: "testing"
+    CONAN_TOTAL_PAGES: 1
+    CONAN_STABLE_BRANCH_PATTERN: "release/*"
     
     matrix:
         - CONAN_CURRENT_PAGE: 1
-        - CONAN_CURRENT_PAGE: 2  
-        - CONAN_CURRENT_PAGE: 3
-        - CONAN_CURRENT_PAGE: 4
 
 install:
   - set PATH=%PATH%;%PYTHON%/Scripts/
