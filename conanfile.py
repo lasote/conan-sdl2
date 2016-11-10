@@ -32,10 +32,7 @@ class SDLConan(ConanFile):
     def config(self):
         if self.settings.os != "Windows":
             self.options.directx = False
-        try: # Try catch can be removed when conan 0.8 is released
-            del self.settings.compiler.libcxx 
-        except: 
-            pass
+        del self.settings.compiler.libcxx
     
     def source(self):
         zip_name = "%s.tar.gz" % self.folder
@@ -89,8 +86,9 @@ class SDLConan(ConanFile):
         cmake = CMake(self.settings)
          # Build
         directx_def = "-DDIRECTX=ON" if self.options.directx else "-DDIRECTX=OFF"
+        static_run = "-DSDL_SHARED_ENABLED_BY_DEFAULT=%s" % ("ON" if self.options.shared else "OFF")
         self.run("cd %s &&  mkdir _build" % self.folder)
-        configure_command = 'cd %s/_build && cmake .. %s %s' % (self.folder, cmake.command_line, directx_def)
+        configure_command = 'cd %s/_build && cmake .. %s %s %s -DLIBC=ON' % (self.folder, cmake.command_line, directx_def, static_run)
         self.output.warn("Configure with: %s" % configure_command)
         self.run(configure_command)
         self.run("cd %s/_build && cmake --build . %s" % (self.folder, cmake.build_config))
@@ -107,7 +105,8 @@ class SDLConan(ConanFile):
         self.copy(pattern="*.h", dst="include", src="%s/include" % self.folder, keep_path=False)
         
         # Win
-        self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
+        if self.options.shared:
+            self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
         
         # UNIX
