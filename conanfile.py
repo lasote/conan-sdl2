@@ -6,7 +6,7 @@ from conans import CMake, ConfigureEnvironment
 
 class SDLConan(ConanFile):
     name = "SDL2"
-    version = "2.0.4"
+    version = "2.0.5"
     folder = "SDL2-%s" % version
     settings = "os", "arch", "compiler", "build_type"
     options = {"directx": [True, False], "shared": [True, False], "fPIC": [True, False]}
