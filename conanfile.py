@@ -97,12 +97,9 @@ class SDLConan(ConanFile):
         """ Define your conan structure: headers, libs and data. After building your
             project, this method is called to create a defined structure:
         """
-        # Duplicate headers, SDL2/SDL.h and SDL.h are commonly used... fucking mess
+
         self.copy(pattern="*.h", dst="include/SDL2", src="%s/_build/include" % self.folder, keep_path=False)
         self.copy(pattern="*.h", dst="include/SDL2", src="%s/include" % self.folder, keep_path=False)
-        
-        self.copy(pattern="*.h", dst="include", src="%s/_build/include" % self.folder, keep_path=False)
-        self.copy(pattern="*.h", dst="include", src="%s/include" % self.folder, keep_path=False)
         
         # Win
         if self.options.shared:
@@ -120,7 +117,8 @@ class SDLConan(ConanFile):
                 self.copy(pattern="*.dylib*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
 
     def package_info(self):  
-                
+        
+        self.cpp_info.includedirs += ["include/SDL2"]
         self.cpp_info.libs = ["SDL2"]
           
         if self.settings.os == "Windows":
