@@ -29,7 +29,7 @@ class SDLConan(ConanFile):
                     self.output.error("GL Installation doesn't work... install it manually and try again")
                     exit(1)
 
-    def config(self):
+    def config_options(self):
         if self.settings.os != "Windows":
             self.options.directx = False
         del self.settings.compiler.libcxx
