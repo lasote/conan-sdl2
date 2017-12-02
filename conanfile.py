@@ -15,10 +15,10 @@ class SDLConan(ConanFile):
     fPIC=True'''
     exports = "CMakeLists.txt"
     generators = "cmake"
-    url="https://github.com/lasote/conan-sdl2"
+    url = "https://github.com/lasote/conan-sdl2"
     requires = "zlib/1.2.11@conan/stable"
-    license="zlib license: https://www.libsdl.org/license.php"
-    build_policy="missing"
+    license = "zlib license: https://www.libsdl.org/license.php"
+    build_policy = "missing"
 
     def system_requirements(self):
         if not self.has_gl_installed():
@@ -59,7 +59,7 @@ class SDLConan(ConanFile):
         suffix = ""
         with_fpic = ""
         if self.settings.arch == "x86":
-            suffix = 'CFLAGS="-m32" LDFLAGS="-m32"' # not working the env, dont know why
+            suffix = 'CFLAGS="-m32" LDFLAGS="-m32"'  # not working the env, dont know why
 
         env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
         if self.options.fPIC:
@@ -68,9 +68,9 @@ class SDLConan(ConanFile):
         else:
             env_line = env.command_line
 
-        env_line = env_line.replace('LIBS="', 'LIBS2="') # Rare error if LIBS is kept
+        env_line = env_line.replace('LIBS="', 'LIBS2="')  # Rare error if LIBS is kept
 
-        if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
+        if self.settings.os == "Macos":  # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
             new_str = "-install_name "
             replace_in_file("%s/configure" % self.folder, old_str, new_str)
@@ -83,7 +83,7 @@ class SDLConan(ConanFile):
         self.run("cd %s && %s make %s" % (self.folder, env_line, suffix))
 
     def build_with_cmake(self):
-        cmake = CMake()
+        cmake = CMake(self)
         # Build
         directx_def = "-DDIRECTX=ON" if self.options.directx else "-DDIRECTX=OFF"
         static_run = "-DSDL_SHARED_ENABLED_BY_DEFAULT=%s" % ("ON" if self.options.shared else "OFF")
