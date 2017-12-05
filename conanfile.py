@@ -3,6 +3,7 @@ from conans.tools import download, unzip, replace_in_file
 import shutil
 from conans import CMake, ConfigureEnvironment
 
+
 class SDLConan(ConanFile):
     name = "SDL2"
     version = "2.0.5"
@@ -14,11 +15,11 @@ class SDLConan(ConanFile):
     fPIC=True'''
     exports = "CMakeLists.txt"
     generators = "cmake"
-    url="http://github.com/lasote/conan-sdl2"
-    requires = "zlib/1.2.8@lasote/stable"
-    license="zlib license: https://www.libsdl.org/license.php "
-    build_policy="missing"
-    
+    url = "https://github.com/lasote/conan-sdl2"
+    requires = "zlib/1.2.11@conan/stable"
+    license = "zlib license: https://www.libsdl.org/license.php"
+    build_policy = "missing"
+
     def system_requirements(self):
         if not self.has_gl_installed():
             if self.settings.os == "Linux":
@@ -32,7 +33,7 @@ class SDLConan(ConanFile):
         if self.settings.os != "Windows":
             self.options.directx = False
         del self.settings.compiler.libcxx
-    
+
     def source(self):
         zip_name = "%s.tar.gz" % self.folder
         download("https://www.libsdl.org/release/%s" % zip_name, zip_name)
@@ -51,25 +52,25 @@ class SDLConan(ConanFile):
             self.build_with_make()
 
     def build_with_make(self):
-         
+
         self.run("cd %s" % self.folder)
         self.run("chmod a+x %s/configure" % self.folder)
-        
+
         suffix = ""
         with_fpic = ""
         if self.settings.arch == "x86":
-            suffix = 'CFLAGS="-m32" LDFLAGS="-m32"' # not working the env, dont know why
-        
+            suffix = 'CFLAGS="-m32" LDFLAGS="-m32"'  # not working the env, dont know why
+
         env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
         if self.options.fPIC:
             env_line = env.command_line.replace('CFLAGS="', 'CFLAGS="-fPIC ')
             with_fpic += " --with-pic"
         else:
             env_line = env.command_line
-            
-        env_line = env_line.replace('LIBS="', 'LIBS2="') # Rare error if LIBS is kept
 
-        if self.settings.os == "Macos": # Fix rpath, we want empty rpaths, just pointing to lib file
+        env_line = env_line.replace('LIBS="', 'LIBS2="')  # Rare error if LIBS is kept
+
+        if self.settings.os == "Macos":  # Fix rpath, we want empty rpaths, just pointing to lib file
             old_str = "-install_name \$rpath/"
             new_str = "-install_name "
             replace_in_file("%s/configure" % self.folder, old_str, new_str)
@@ -82,8 +83,8 @@ class SDLConan(ConanFile):
         self.run("cd %s && %s make %s" % (self.folder, env_line, suffix))
 
     def build_with_cmake(self):
-        cmake = CMake(self.settings)
-         # Build
+        cmake = CMake(self)
+        # Build
         directx_def = "-DDIRECTX=ON" if self.options.directx else "-DDIRECTX=OFF"
         static_run = "-DSDL_SHARED_ENABLED_BY_DEFAULT=%s" % ("ON" if self.options.shared else "OFF")
         static_run += " -DSDL_STATIC=%s" % ("OFF" if self.options.shared else "ON")
@@ -100,27 +101,27 @@ class SDLConan(ConanFile):
 
         self.copy(pattern="*.h", dst="include/SDL2", src="%s/_build/include" % self.folder, keep_path=False)
         self.copy(pattern="*.h", dst="include/SDL2", src="%s/include" % self.folder, keep_path=False)
-        
+
         # Win
         if self.options.shared:
             self.copy(pattern="*.dll", dst="bin", src="%s/_build/" % self.folder, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src="%s/_build/" % self.folder, keep_path=False)
-        
+
         # UNIX
         if self.settings.os != "Windows":
             self.copy(pattern="sdl2-config", dst="lib", src="%s/" % self.folder, keep_path=False)
             if not self.options.shared:
                 self.copy(pattern="*.a", dst="lib", src="%s/build/" % self.folder, keep_path=False)
-                self.copy(pattern="*.a", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)   
+                self.copy(pattern="*.a", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
             else:
                 self.copy(pattern="*.so*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
                 self.copy(pattern="*.dylib*", dst="lib", src="%s/build/.libs/" % self.folder, keep_path=False)
 
-    def package_info(self):  
-        
+    def package_info(self):
+
         self.cpp_info.includedirs += ["include/SDL2"]
         self.cpp_info.libs = ["SDL2"]
-          
+
         if self.settings.os == "Windows":
             self.cpp_info.libs.append("OpenGL32")
             self.cpp_info.libs.append("SDL2main")
@@ -134,8 +135,8 @@ class SDLConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.libs.append("SDL2main")
                 self.cpp_info.libs.append("iconv")
-                
-                
+
+
                 self.cpp_info.exelinkflags.append("-framework Carbon")
                 self.cpp_info.exelinkflags.append("-framework CoreAudio")
                 self.cpp_info.exelinkflags.append("-framework Cocoa")
@@ -145,10 +146,10 @@ class SDLConan(ConanFile):
                 self.cpp_info.exelinkflags.append("-framework AudioToolbox")
                 self.cpp_info.exelinkflags.append("-framework ForceFeedback")
                 self.cpp_info.exelinkflags.append("-framework AudioUnit")
-                
-                
+
+
                 self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
-                
+
         elif self.settings.os == "Linux":
             self.cpp_info.libs.append("GL")
             if not self.options.shared:
@@ -168,7 +169,7 @@ class SDLConan(ConanFile):
         if self.settings.os == "Linux":
             return self.has_gl_installed_linux()
         return True
-        
+
     def has_gl_installed_linux(self):
         test_program = '''#include <GL/gl.h>
 #include <GL/glu.h>
@@ -207,7 +208,7 @@ quad();
 // Pop the Matrix
 glPopMatrix();
 
-// display it 
+// display it
 glutSwapBuffers();
 }
 
@@ -219,7 +220,7 @@ if(key==27) exit(0);
 
 int main(int argc, char **argv)
 {
-// Double Buffered RGB display 
+// Double Buffered RGB display
 glutInitDisplayMode( GLUT_RGB | GLUT_DOUBLE);
 // Set window size
 glutInitWindowSize( 500,500 );
@@ -236,5 +237,4 @@ glutMainLoop();
             self.output.info("GL DETECTED OK!")
             return True
         except:
-            return False 
-        
+            return False
